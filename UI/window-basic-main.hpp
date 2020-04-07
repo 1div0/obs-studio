@@ -303,7 +303,7 @@ private:
 	void UpdateVolumeControlsPeakMeterType();
 	void ClearVolumeControls();
 
-	void UploadLog(const char *subdir, const char *file);
+	void UploadLog(const char *subdir, const char *file, const bool crash);
 
 	void Save(const char *file);
 	void Load(const char *file);
@@ -937,6 +937,8 @@ private slots:
 	void PauseToggled();
 
 	void logUploadFinished(const QString &text, const QString &error);
+	void crashUploadFinished(const QString &text, const QString &error);
+	void openLogDialog(const QString &text, const bool crash);
 
 	void updateCheckFinished();
 
