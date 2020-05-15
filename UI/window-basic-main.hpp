@@ -34,6 +34,7 @@
 #include "window-projector.hpp"
 #include "window-basic-about.hpp"
 #include "auth-base.hpp"
+#include "log-viewer.hpp"
 
 #include <obs-frontend-internal.hpp>
 
@@ -211,6 +212,8 @@ private:
 	QPointer<OBSBasicFilters> filters;
 	QPointer<QDockWidget> statsDock;
 	QPointer<OBSAbout> about;
+
+	OBSLogViewer *logView;
 
 	QPointer<QTimer> cpuUsageTimer;
 	QPointer<QTimer> diskFullTimer;
