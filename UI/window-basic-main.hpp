@@ -610,7 +610,7 @@ private slots:
 
 	void ProcessHotkey(obs_hotkey_id id, bool pressed);
 
-	void AddTransition();
+	void AddTransition(QString id);
 	void RenameTransition();
 	void TransitionClicked();
 	void TransitionStopped();
@@ -936,7 +936,6 @@ private slots:
 	void on_toggleSourceIcons_toggled(bool visible);
 
 	void on_transitions_currentIndexChanged(int index);
-	void on_transitionAdd_clicked();
 	void on_transitionRemove_clicked();
 	void on_transitionProps_clicked();
 	void on_transitionDuration_valueChanged(int value);
