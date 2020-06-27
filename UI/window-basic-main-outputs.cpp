@@ -886,8 +886,7 @@ bool SimpleOutput::StartStreaming(obs_service_t *service)
 
 static void remove_reserved_file_characters(string &s)
 {
-	replace(s.begin(), s.end(), '/', '_');
-	replace(s.begin(), s.end(), '\\', '_');
+	replace(s.begin(), s.end(), '\\', '/');
 	replace(s.begin(), s.end(), '*', '_');
 	replace(s.begin(), s.end(), '?', '_');
 	replace(s.begin(), s.end(), '"', '_');
