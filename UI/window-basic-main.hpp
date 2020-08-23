@@ -349,6 +349,7 @@ private:
 
 	void CloseDialogs();
 	void ClearSceneData();
+	void ClearProjectors();
 
 	void Nudge(int dist, MoveDir dir);
 
