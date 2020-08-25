@@ -1011,6 +1011,7 @@ public slots:
 	bool RecordingActive();
 	bool ReplayBufferActive();
 
+	void ClearContextBar();
 	void UpdateContextBar();
 
 public:
