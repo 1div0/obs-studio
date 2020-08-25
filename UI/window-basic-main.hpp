@@ -165,6 +165,8 @@ class OBSBasic : public OBSMainWindow {
 	friend class ReplayBufferButton;
 	friend class ExtraBrowsersModel;
 	friend class ExtraBrowsersDelegate;
+	friend class DeviceCaptureToolbar;
+	friend class DeviceToolbarPropertiesThread;
 	friend struct BasicOutputHandler;
 	friend struct OBSStudioAPI;
 
@@ -200,6 +202,7 @@ private:
 	bool copyVisible = true;
 
 	bool closing = false;
+	QScopedPointer<QThread> devicePropertiesThread;
 	QScopedPointer<QThread> whatsNewInitThread;
 	QScopedPointer<QThread> updateCheckThread;
 	QScopedPointer<QThread> introCheckThread;
