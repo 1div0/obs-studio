@@ -826,7 +826,7 @@ void AutoConfigTestPage::FindIdealHardwareResolution()
 			return;
 
 		AutoConfig::Encoder encType = wiz->streamingEncoder;
-		bool nvenc = encType == AutoConfig::Encoder::NVENC;
+		bool nvenc = encType == AutoConfig::Encoder::NVENC_H264;
 
 		int minBitrate = EstimateMinBitrate(cx, cy, fps_num, fps_den);
 
@@ -900,8 +900,10 @@ void AutoConfigTestPage::TestStreamEncoderThread()
 	}
 
 	if (!softwareTested) {
-		if (wiz->nvencAvailable)
-			wiz->streamingEncoder = AutoConfig::Encoder::NVENC;
+		if (wiz->nvencH264Available)
+			wiz->streamingEncoder = AutoConfig::Encoder::NVENC_H264;
+		else if (wiz->nvencHEVCAvailable)
+			wiz->streamingEncoder = AutoConfig::Encoder::NVENC_HEVC;
 		else if (wiz->qsvAvailable)
 			wiz->streamingEncoder = AutoConfig::Encoder::QSV;
 		else
@@ -933,8 +935,10 @@ void AutoConfigTestPage::TestRecordingEncoderThread()
 	bool recordingOnly = wiz->type == AutoConfig::Type::Recording;
 
 	if (wiz->hardwareEncodingAvailable) {
-		if (wiz->nvencAvailable)
-			wiz->recordingEncoder = AutoConfig::Encoder::NVENC;
+		if (wiz->nvencH264Available)
+			wiz->recordingEncoder = AutoConfig::Encoder::NVENC_H264;
+		else if (wiz->nvencHEVCAvailable)
+			wiz->recordingEncoder = AutoConfig::Encoder::NVENC_HEVC;
 		else if (wiz->qsvAvailable)
 			wiz->recordingEncoder = AutoConfig::Encoder::QSV;
 		else
@@ -943,7 +947,7 @@ void AutoConfigTestPage::TestRecordingEncoderThread()
 		wiz->recordingEncoder = AutoConfig::Encoder::x264;
 	}
 
-	if (wiz->recordingEncoder != AutoConfig::Encoder::NVENC) {
+	if (wiz->recordingEncoder != AutoConfig::Encoder::NVENC_H264) {
 		if (!recordingOnly) {
 			wiz->recordingEncoder = AutoConfig::Encoder::Stream;
 			wiz->recordingQuality = AutoConfig::Quality::Stream;
@@ -954,8 +958,10 @@ void AutoConfigTestPage::TestRecordingEncoderThread()
 }
 
 #define ENCODER_TEXT(x) "Basic.Settings.Output.Simple.Encoder." x
-#define ENCODER_SOFTWARE ENCODER_TEXT("Software")
-#define ENCODER_NVENC ENCODER_TEXT("Hardware.NVENC")
+#define ENCODER_SOFTWARE_X264 ENCODER_TEXT("Software x264")
+#define ENCODER_SOFTWARE_X265 ENCODER_TEXT("Software x265")
+#define ENCODER_NVENC_H264 ENCODER_TEXT("Hardware.NVENC H.264")
+#define ENCODER_NVENC_HEVC ENCODER_TEXT("Hardware.NVENC HEVC")
 #define ENCODER_QSV ENCODER_TEXT("Hardware.QSV")
 #define ENCODER_AMD ENCODER_TEXT("Hardware.AMD")
 
@@ -972,9 +978,13 @@ void AutoConfigTestPage::FinalizeResults()
 	auto encName = [](AutoConfig::Encoder enc) -> QString {
 		switch (enc) {
 		case AutoConfig::Encoder::x264:
-			return QTStr(ENCODER_SOFTWARE);
-		case AutoConfig::Encoder::NVENC:
-			return QTStr(ENCODER_NVENC);
+			return QTStr(ENCODER_SOFTWARE_X264);
+		case AutoConfig::Encoder::x265:
+			return QTStr(ENCODER_SOFTWARE_X265);
+		case AutoConfig::Encoder::NVENC_H264:
+			return QTStr(ENCODER_NVENC_H264);
+		case AutoConfig::Encoder::NVENC_HEVC:
+			return QTStr(ENCODER_NVENC_HEVC);
 		case AutoConfig::Encoder::QSV:
 			return QTStr(ENCODER_QSV);
 		case AutoConfig::Encoder::AMD:
@@ -983,7 +993,7 @@ void AutoConfigTestPage::FinalizeResults()
 			return QTStr(QUALITY_SAME);
 		}
 
-		return QTStr(ENCODER_SOFTWARE);
+		return QTStr(ENCODER_SOFTWARE_X264);
 	};
 
 	auto newLabel = [this](const char *str) -> QLabel * {
