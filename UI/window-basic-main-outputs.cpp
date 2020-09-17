@@ -284,6 +284,7 @@ struct SimpleOutput : BasicOutputHandler {
 	void UpdateRecording();
 	bool ConfigureRecording(bool useReplayBuffer);
 
+	virtual bool SetupStreaming(obs_service_t *service) override;
 	virtual bool StartStreaming(obs_service_t *service) override;
 	virtual bool StartRecording() override;
 	virtual bool StartReplayBuffer() override;
@@ -775,7 +776,7 @@ const char *FindAudioEncoderFromCodec(const char *type)
 	return nullptr;
 }
 
-bool SimpleOutput::StartStreaming(obs_service_t *service)
+bool SimpleOutput::SetupStreaming(obs_service_t *service)
 {
 	if (!Active())
 		SetupOutputs();
@@ -869,9 +870,11 @@ bool SimpleOutput::StartStreaming(obs_service_t *service)
 	obs_output_set_video_encoder(streamOutput, h264Streaming);
 	obs_output_set_audio_encoder(streamOutput, aacStreaming, 0);
 	obs_output_set_service(streamOutput, service);
+	return true;
+}
 
-	/* --------------------- */
-
+bool SimpleOutput::StartStreaming(obs_service_t *service)
+{
 	bool reconnect = config_get_bool(main->Config(), "Output", "Reconnect");
 	int retryDelay =
 		config_get_uint(main->Config(), "Output", "RetryDelay");
@@ -920,6 +923,7 @@ bool SimpleOutput::StartStreaming(obs_service_t *service)
 	else
 		lastError = string();
 
+	const char *type = obs_service_get_output_type(service);
 	blog(LOG_WARNING, "Stream output type '%s' failed to start!%s%s", type,
 	     hasLastError ? "  Last Error: " : "", hasLastError ? error : "");
 	return false;
@@ -1121,6 +1125,7 @@ struct AdvancedOutput : BasicOutputHandler {
 	void SetupOutputs() override;
 	int GetAudioBitrate(size_t i) const;
 
+	virtual bool SetupStreaming(obs_service_t *service) override;
 	virtual bool StartStreaming(obs_service_t *service) override;
 	virtual bool StartRecording() override;
 	virtual bool StartReplayBuffer() override;
@@ -1602,7 +1607,7 @@ int AdvancedOutput::GetAudioBitrate(size_t i) const
 	return FindClosestAvailableAACBitrate(bitrate);
 }
 
-bool AdvancedOutput::StartStreaming(obs_service_t *service)
+bool AdvancedOutput::SetupStreaming(obs_service_t *service)
 {
 	int streamTrack =
 		config_get_int(main->Config(), "AdvOut", "TrackIndex") - 1;
@@ -1704,9 +1709,11 @@ bool AdvancedOutput::StartStreaming(obs_service_t *service)
 
 	obs_output_set_video_encoder(streamOutput, h264Streaming);
 	obs_output_set_audio_encoder(streamOutput, streamAudioEnc, 0);
+	return true;
+}
 
-	/* --------------------- */
-
+bool AdvancedOutput::StartStreaming(obs_service_t *service)
+{
 	obs_output_set_service(streamOutput, service);
 
 	bool reconnect = config_get_bool(main->Config(), "Output", "Reconnect");
@@ -1755,6 +1762,7 @@ bool AdvancedOutput::StartStreaming(obs_service_t *service)
 	else
 		lastError = string();
 
+	const char *type = obs_service_get_output_type(service);
 	blog(LOG_WARNING, "Stream output type '%s' failed to start!%s%s", type,
 	     hasLastError ? "  Last Error: " : "", hasLastError ? error : "");
 	return false;
