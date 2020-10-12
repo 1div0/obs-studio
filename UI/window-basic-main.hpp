@@ -575,6 +575,7 @@ public slots:
 
 	void ReplayBufferStart();
 	void ReplayBufferSave();
+	void ReplayBufferSaved();
 	void ReplayBufferStopping();
 	void ReplayBufferStop(int code);
 
