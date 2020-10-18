@@ -1239,6 +1239,8 @@ AdvancedOutput::AdvancedOutput(OBSBasic *main_) : BasicOutputHandler(main_)
 			replayBufferStopping.Connect(signal, "stopping",
 						     OBSReplayBufferStopping,
 						     this);
+			replayBufferSaved.Connect(signal, "saved",
+						  OBSReplayBufferSaved, this);
 		}
 
 		fileOutput = obs_output_create(
