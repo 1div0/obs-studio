@@ -32,6 +32,7 @@
 
 class OBSBasic;
 class QAbstractButton;
+class QRadioButton;
 class QComboBox;
 class QCheckBox;
 class QLabel;
@@ -157,6 +158,10 @@ private:
 	uint32_t outputCX = 0;
 	uint32_t outputCY = 0;
 
+	QPointer<QCheckBox> vodTrackCheckbox;
+	QPointer<QWidget> vodTrackContainer;
+	QPointer<QRadioButton> vodTrack[MAX_AUDIO_MIXES];
+
 	void SaveCombo(QComboBox *widget, const char *section,
 		       const char *value);
 	void SaveComboData(QComboBox *widget, const char *section,
@@ -240,6 +245,7 @@ private:
 private slots:
 	void UpdateServerList();
 	void UpdateKeyLink();
+	void UpdateVodTrackSetting();
 	void UpdateMoreInfoLink();
 	void on_show_clicked();
 	void on_authPwShow_clicked();
