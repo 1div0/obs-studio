@@ -1259,15 +1259,6 @@ AdvancedOutput::AdvancedOutput(OBSBasic *main_) : BasicOutputHandler(main_)
 	OBSData streamEncSettings = GetDataFromJsonFile("streamEncoder.json");
 	OBSData recordEncSettings = GetDataFromJsonFile("recordEncoder.json");
 
-	const char *rate_control = obs_data_get_string(
-		useStreamEncoder ? streamEncSettings : recordEncSettings,
-		"rate_control");
-	if (!rate_control)
-		rate_control = "";
-	usesBitrate = astrcmpi(rate_control, "CBR") == 0 ||
-		      astrcmpi(rate_control, "VBR") == 0 ||
-		      astrcmpi(rate_control, "ABR") == 0;
-
 	if (ffmpegOutput) {
 		fileOutput = obs_output_create(
 			"ffmpeg_output", "adv_ffmpeg_output", nullptr, nullptr);
@@ -1347,6 +1338,15 @@ AdvancedOutput::AdvancedOutput(OBSBasic *main_) : BasicOutputHandler(main_)
 		      "(advanced output)";
 	obs_encoder_release(h264Streaming);
 #endif
+
+	const char *rate_control = obs_data_get_string(
+		useStreamEncoder ? streamEncSettings : recordEncSettings,
+		"rate_control");
+	if (!rate_control)
+		rate_control = "";
+	usesBitrate = astrcmpi(rate_control, "CBR") == 0 ||
+		      astrcmpi(rate_control, "VBR") == 0 ||
+		      astrcmpi(rate_control, "ABR") == 0;
 
 	for (int i = 0; i < MAX_AUDIO_MIXES; i++) {
 		char name[9];
