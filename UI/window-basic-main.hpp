@@ -757,6 +757,7 @@ public:
 	void SetService(obs_service_t *service);
 
 	int GetTransitionDuration();
+	int GetTbarPosition();
 
 	inline bool IsPreviewProgramMode() const
 	{
@@ -957,6 +958,7 @@ private slots:
 	void RemoveTransitionClicked();
 	void on_transitionProps_clicked();
 	void on_transitionDuration_valueChanged(int value);
+	void on_tbar_position_valueChanged(int value);
 
 	void on_modeSwitch_clicked();
 
