@@ -1504,13 +1504,13 @@ void OBSBasic::InitBasicConfigDefaults2()
 {
 	bool oldEncDefaults = config_get_bool(App()->GlobalConfig(), "General",
 					      "Pre23Defaults");
-	bool useNV = EncoderAvailable("ffmpeg_nvenc") && !oldEncDefaults;
+	bool useNV = EncoderAvailable("ffmpeg_nvenc_h264") && !oldEncDefaults;
 
 	config_set_default_string(basicConfig, "SimpleOutput", "StreamEncoder",
-				  useNV ? SIMPLE_ENCODER_NVENC
+				  useNV ? SIMPLE_ENCODER_NVENC_H264
 					: SIMPLE_ENCODER_X264);
 	config_set_default_string(basicConfig, "SimpleOutput", "RecEncoder",
-				  useNV ? SIMPLE_ENCODER_NVENC
+				  useNV ? SIMPLE_ENCODER_NVENC_H264
 					: SIMPLE_ENCODER_X264);
 }
 

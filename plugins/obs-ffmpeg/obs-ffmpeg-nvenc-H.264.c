@@ -29,14 +29,14 @@
 #include "obs-ffmpeg-formats.h"
 
 #define do_log(level, format, ...)                   \
-	blog(level, "[NVENC encoder: '%s'] " format, \
+	blog(level, "[NVENC H.264 encoder: '%s'] " format, \
 	     obs_encoder_get_name(enc->encoder), ##__VA_ARGS__)
 
 #define warn(format, ...) do_log(LOG_WARNING, format, ##__VA_ARGS__)
 #define info(format, ...) do_log(LOG_INFO, format, ##__VA_ARGS__)
 #define debug(format, ...) do_log(LOG_DEBUG, format, ##__VA_ARGS__)
 
-struct nvenc_encoder {
+struct nvenc_h264_encoder {
 	obs_encoder_t *encoder;
 
 	AVCodec *nvenc;
@@ -71,7 +71,7 @@ static inline bool valid_format(enum video_format format)
 
 static void nvenc_video_info(void *data, struct video_scale_info *info)
 {
-	struct nvenc_encoder *enc = data;
+	struct nvenc_h264_encoder *enc = data;
 	enum video_format pref_format;
 
 	pref_format = obs_encoder_get_preferred_video_format(enc->encoder);
@@ -84,7 +84,7 @@ static void nvenc_video_info(void *data, struct video_scale_info *info)
 	info->format = pref_format;
 }
 
-static bool nvenc_init_codec(struct nvenc_encoder *enc)
+static bool nvenc_init_codec(struct nvenc_h264_encoder *enc)
 {
 	int ret;
 
@@ -162,7 +162,7 @@ enum RC_MODE { RC_MODE_CBR, RC_MODE_VBR, RC_MODE_CQP, RC_MODE_LOSSLESS };
 
 static bool nvenc_update(void *data, obs_data_t *settings)
 {
-	struct nvenc_encoder *enc = data;
+	struct nvenc_h264_encoder *enc = data;
 
 	const char *rc = obs_data_get_string(settings, "rate_control");
 	int bitrate = (int)obs_data_get_int(settings, "bitrate");
@@ -297,7 +297,7 @@ static bool nvenc_update(void *data, obs_data_t *settings)
 static bool nvenc_reconfigure(void *data, obs_data_t *settings)
 {
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(58, 19, 101)
-	struct nvenc_encoder *enc = data;
+	struct nvenc_h264_encoder *enc = data;
 
 	const int64_t bitrate = obs_data_get_int(settings, "bitrate");
 	const char *rc = obs_data_get_string(settings, "rate_control");
@@ -314,7 +314,7 @@ static bool nvenc_reconfigure(void *data, obs_data_t *settings)
 
 static void nvenc_destroy(void *data)
 {
-	struct nvenc_encoder *enc = data;
+	struct nvenc_h264_encoder *enc = data;
 
 	if (enc->initialized) {
 		AVPacket pkt = {0};
@@ -347,7 +347,7 @@ static void nvenc_destroy(void *data)
 
 static void *nvenc_create(obs_data_t *settings, obs_encoder_t *encoder)
 {
-	struct nvenc_encoder *enc;
+	struct nvenc_h264_encoder *enc;
 
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)
 	avcodec_register_all();
@@ -414,7 +414,7 @@ static inline void copy_data(AVFrame *pic, const struct encoder_frame *frame,
 static bool nvenc_encode(void *data, struct encoder_frame *frame,
 			 struct encoder_packet *packet, bool *received_packet)
 {
-	struct nvenc_encoder *enc = data;
+	struct nvenc_h264_encoder *enc = data;
 	AVPacket av_pkt = {0};
 	int got_packet;
 	int ret;
@@ -474,7 +474,7 @@ static bool nvenc_encode(void *data, struct encoder_frame *frame,
 	return true;
 }
 
-void nvenc_defaults(obs_data_t *settings)
+void nvenc_h264_defaults(obs_data_t *settings)
 {
 	obs_data_set_default_int(settings, "bitrate", 2500);
 	obs_data_set_default_int(settings, "max_bitrate", 5000);
@@ -516,7 +516,7 @@ static bool rate_control_modified(obs_properties_t *ppts, obs_property_t *p,
 	return true;
 }
 
-obs_properties_t *nvenc_properties_internal(bool ffmpeg)
+obs_properties_t *nvenc_h264_properties_internal(bool ffmpeg)
 {
 	obs_properties_t *props = obs_properties_create();
 	obs_property_t *p;
@@ -598,21 +598,21 @@ obs_properties_t *nvenc_properties_internal(bool ffmpeg)
 	return props;
 }
 
-obs_properties_t *nvenc_properties(void *unused)
+obs_properties_t *nvenc_h264_properties(void *unused)
 {
 	UNUSED_PARAMETER(unused);
-	return nvenc_properties_internal(false);
+	return nvenc_h264_properties_internal(false);
 }
 
-obs_properties_t *nvenc_properties_ffmpeg(void *unused)
+obs_properties_t *nvenc_h264_properties_ffmpeg(void *unused)
 {
 	UNUSED_PARAMETER(unused);
-	return nvenc_properties_internal(true);
+	return nvenc_h264_properties_internal(true);
 }
 
 static bool nvenc_extra_data(void *data, uint8_t **extra_data, size_t *size)
 {
-	struct nvenc_encoder *enc = data;
+	struct nvenc_h264_encoder *enc = data;
 
 	*extra_data = enc->header;
 	*size = enc->header_size;
@@ -621,15 +621,15 @@ static bool nvenc_extra_data(void *data, uint8_t **extra_data, size_t *size)
 
 static bool nvenc_sei_data(void *data, uint8_t **extra_data, size_t *size)
 {
-	struct nvenc_encoder *enc = data;
+	struct nvenc_h264_encoder *enc = data;
 
 	*extra_data = enc->sei;
 	*size = enc->sei_size;
 	return true;
 }
 
-struct obs_encoder_info nvenc_encoder_info = {
-	.id = "ffmpeg_nvenc",
+struct obs_encoder_info nvenc_h264_encoder_info = {
+	.id = "ffmpeg_nvenc_h264",
 	.type = OBS_ENCODER_VIDEO,
 	.codec = "h264",
 	.get_name = nvenc_getname,
@@ -637,8 +637,8 @@ struct obs_encoder_info nvenc_encoder_info = {
 	.destroy = nvenc_destroy,
 	.encode = nvenc_encode,
 	.update = nvenc_reconfigure,
-	.get_defaults = nvenc_defaults,
-	.get_properties = nvenc_properties_ffmpeg,
+	.get_defaults = nvenc_h264_defaults,
+	.get_properties = nvenc_h264_properties_ffmpeg,
 	.get_extra_data = nvenc_extra_data,
 	.get_sei_data = nvenc_sei_data,
 	.get_video_info = nvenc_video_info,

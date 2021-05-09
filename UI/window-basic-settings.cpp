@@ -986,7 +986,7 @@ void OBSBasicSettings::LoadEncoderTypes()
 
 		const char *streaming_codecs[] = {
 			"h264",
-			//"hevc",
+			"hevc",
 		};
 		bool is_streaming_codec = false;
 		for (const char *test_codec : streaming_codecs) {
@@ -1699,8 +1699,10 @@ void OBSBasicSettings::LoadSimpleOutputSettings()
 		config_get_string(main->Config(), "SimpleOutput", "Preset");
 	const char *qsvPreset =
 		config_get_string(main->Config(), "SimpleOutput", "QSVPreset");
-	const char *nvPreset = config_get_string(main->Config(), "SimpleOutput",
-						 "NVENCPreset");
+	const char *nvH264Preset = config_get_string(main->Config(), "SimpleOutput",
+						 "NVENCH264Preset");
+	const char *nvHEVCPreset = config_get_string(main->Config(), "SimpleOutput",
+						 "NVENCHEVCPreset");
 	const char *amdPreset =
 		config_get_string(main->Config(), "SimpleOutput", "AMDPreset");
 	const char *custom = config_get_string(main->Config(), "SimpleOutput",
@@ -1720,7 +1722,8 @@ void OBSBasicSettings::LoadSimpleOutputSettings()
 
 	curPreset = preset;
 	curQSVPreset = qsvPreset;
-	curNVENCPreset = nvPreset;
+	curNVENCH264Preset = nvH264Preset;
+	curNVENCHEVCPreset = nvHEVCPreset;
 	curAMDPreset = amdPreset;
 
 	audioBitrate = FindClosestAvailableAACBitrate(audioBitrate);
@@ -3373,8 +3376,10 @@ void OBSBasicSettings::SaveOutputSettings()
 
 	if (encoder == SIMPLE_ENCODER_QSV)
 		presetType = "QSVPreset";
-	else if (encoder == SIMPLE_ENCODER_NVENC)
-		presetType = "NVENCPreset";
+	else if (encoder == SIMPLE_ENCODER_NVENC_H264)
+		presetType = "NVENC H.264 Preset";
+	else if (encoder == SIMPLE_ENCODER_NVENC_HEVC)
+		presetType = "NVENC HEVC Preset";
 	else if (encoder == SIMPLE_ENCODER_AMD)
 		presetType = "AMDPreset";
 	else
@@ -4417,9 +4422,12 @@ void OBSBasicSettings::FillSimpleRecordingValues()
 	if (EncoderAvailable("obs_qsv11"))
 		ui->simpleOutRecEncoder->addItem(ENCODER_STR("Hardware.QSV"),
 						 QString(SIMPLE_ENCODER_QSV));
-	if (EncoderAvailable("ffmpeg_nvenc"))
-		ui->simpleOutRecEncoder->addItem(ENCODER_STR("Hardware.NVENC"),
-						 QString(SIMPLE_ENCODER_NVENC));
+	if (EncoderAvailable("ffmpeg_nvenc_h264"))
+		ui->simpleOutRecEncoder->addItem(ENCODER_STR("Hardware.NVENC H.264"),
+						 QString(SIMPLE_ENCODER_NVENC_H264));
+	if (EncoderAvailable("ffmpeg_nvenc_hevc"))
+		ui->simpleOutRecEncoder->addItem(ENCODER_STR("Hardware.NVENC HEVC"),
+						 QString(SIMPLE_ENCODER_NVENC_HEVC));
 	if (EncoderAvailable("amd_amf_h264"))
 		ui->simpleOutRecEncoder->addItem(ENCODER_STR("Hardware.AMD"),
 						 QString(SIMPLE_ENCODER_AMD));
@@ -4433,9 +4441,12 @@ void OBSBasicSettings::FillSimpleStreamingValues()
 	if (EncoderAvailable("obs_qsv11"))
 		ui->simpleOutStrEncoder->addItem(ENCODER_STR("Hardware.QSV"),
 						 QString(SIMPLE_ENCODER_QSV));
-	if (EncoderAvailable("ffmpeg_nvenc"))
-		ui->simpleOutStrEncoder->addItem(ENCODER_STR("Hardware.NVENC"),
-						 QString(SIMPLE_ENCODER_NVENC));
+	if (EncoderAvailable("ffmpeg_nvenc_h264"))
+		ui->simpleOutStrEncoder->addItem(ENCODER_STR("Hardware.NVENC H.264"),
+						 QString(SIMPLE_ENCODER_NVENC_H264));
+	if (EncoderAvailable("ffmpeg_nvenc_hevc"))
+		ui->simpleOutStrEncoder->addItem(ENCODER_STR("Hardware.NVENC HEVC"),
+						 QString(SIMPLE_ENCODER_NVENC_HEVC));
 	if (EncoderAvailable("amd_amf_h264"))
 		ui->simpleOutStrEncoder->addItem(ENCODER_STR("Hardware.AMD"),
 						 QString(SIMPLE_ENCODER_AMD));
@@ -4491,9 +4502,9 @@ void OBSBasicSettings::SimpleStreamingEncoderChanged()
 		defaultPreset = "balanced";
 		preset = curQSVPreset;
 
-	} else if (encoder == SIMPLE_ENCODER_NVENC) {
+	} else if (encoder == SIMPLE_ENCODER_NVENC_H264) {
 		obs_properties_t *props =
-			obs_get_encoder_properties("ffmpeg_nvenc");
+			obs_get_encoder_properties("ffmpeg_nvenc_h264");
 
 		obs_property_t *p = obs_properties_get(props, "preset");
 		size_t num = obs_property_list_item_count(p);
@@ -4501,7 +4512,7 @@ void OBSBasicSettings::SimpleStreamingEncoderChanged()
 			const char *name = obs_property_list_item_name(p, i);
 			const char *val = obs_property_list_item_string(p, i);
 
-			/* bluray is for ideal bluray disc recording settings,
+			/* bluray is ideal for bluray disc recording settings,
 			 * not streaming */
 			if (strcmp(val, "bd") == 0)
 				continue;
@@ -4515,7 +4526,25 @@ void OBSBasicSettings::SimpleStreamingEncoderChanged()
 		obs_properties_destroy(props);
 
 		defaultPreset = "default";
-		preset = curNVENCPreset;
+		preset = curNVENCH264Preset;
+
+	} else if (encoder == SIMPLE_ENCODER_NVENC_HEVC) {
+		obs_properties_t *props =
+			obs_get_encoder_properties("ffmpeg_nvenc_hevc");
+
+		obs_property_t *p = obs_properties_get(props, "preset");
+		size_t num = obs_property_list_item_count(p);
+		for (size_t i = 0; i < num; i++) {
+			const char *name = obs_property_list_item_name(p, i);
+			const char *val = obs_property_list_item_string(p, i);
+
+			ui->simpleOutPreset->addItem(QT_UTF8(name), val);
+		}
+
+		obs_properties_destroy(props);
+
+		defaultPreset = "default";
+		preset = curNVENCHEVCPreset;
 
 	} else if (encoder == SIMPLE_ENCODER_AMD) {
 		ui->simpleOutPreset->addItem("Speed", "speed");

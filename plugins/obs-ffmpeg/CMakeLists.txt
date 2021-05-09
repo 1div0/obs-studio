@@ -27,7 +27,8 @@ set(obs-ffmpeg_HEADERS
 set(obs-ffmpeg_SOURCES
 	obs-ffmpeg.c
 	obs-ffmpeg-audio-encoders.c
-	obs-ffmpeg-nvenc.c
+	obs-ffmpeg-nvenc-H.264.c
+	obs-ffmpeg-nvenc-HEVC.c
 	obs-ffmpeg-output.c
 	obs-ffmpeg-mux.c
 	obs-ffmpeg-hls-mux.c

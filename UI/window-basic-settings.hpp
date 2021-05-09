@@ -137,7 +137,8 @@ private:
 
 	QString curPreset;
 	QString curQSVPreset;
-	QString curNVENCPreset;
+	QString curNVENCH264Preset;
+	QString curNVENCHEVCPreset;
 	QString curAMDPreset;
 
 	QString curAdvStreamEncoder;

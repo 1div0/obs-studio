@@ -900,7 +900,7 @@ AutoConfig::AutoConfig(QWidget *parent) : QWizard(parent)
 		/* Newer generations of NVENC have a high enough quality to
 		 * bitrate ratio that if NVENC is available, it makes sense to
 		 * just always prefer hardware encoding by default */
-		bool preferHardware = nvencAvailable ||
+		bool preferHardware = nvencH264Available ||
 				      os_get_physical_cores() <= 4;
 		streamPage->ui->preferHardware->setChecked(preferHardware);
 	}
@@ -925,8 +925,10 @@ void AutoConfig::TestHardwareEncoding()
 	size_t idx = 0;
 	const char *id;
 	while (obs_enum_encoder_types(idx++, &id)) {
-		if (strcmp(id, "ffmpeg_nvenc") == 0)
-			hardwareEncodingAvailable = nvencAvailable = true;
+		if (strcmp(id, "ffmpeg_nvenc_h264") == 0)
+			hardwareEncodingAvailable = nvencH264Available = true;
+		else if (strcmp(id, "ffmpeg_nvenc_hevc") == 0)
+			hardwareEncodingAvailable = nvencHEVCAvailable = true;
 		else if (strcmp(id, "obs_qsv11") == 0)
 			hardwareEncodingAvailable = qsvAvailable = true;
 		else if (strcmp(id, "amd_amf_h264") == 0)
@@ -972,8 +974,10 @@ void AutoConfig::done(int result)
 inline const char *AutoConfig::GetEncoderId(Encoder enc)
 {
 	switch (enc) {
-	case Encoder::NVENC:
-		return SIMPLE_ENCODER_NVENC;
+	case Encoder::NVENC_H264:
+		return SIMPLE_ENCODER_NVENC_H264;
+	case Encoder::NVENC_HEVC:
+		return SIMPLE_ENCODER_NVENC_HEVC;
 	case Encoder::QSV:
 		return SIMPLE_ENCODER_QSV;
 	case Encoder::AMD:

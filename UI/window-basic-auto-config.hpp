@@ -43,7 +43,9 @@ class AutoConfig : public QWizard {
 
 	enum class Encoder {
 		x264,
-		NVENC,
+		x265,
+		NVENC_H264,
+		NVENC_HEVC,
 		QSV,
 		AMD,
 		Stream,
@@ -85,7 +87,8 @@ class AutoConfig : public QWizard {
 	std::string key;
 
 	bool hardwareEncodingAvailable = false;
-	bool nvencAvailable = false;
+	bool nvencH264Available = false;
+	bool nvencHEVCAvailable = false;
 	bool qsvAvailable = false;
 	bool vceAvailable = false;
 
